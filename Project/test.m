@@ -2,8 +2,33 @@ clc;
 clear;
 
 % orig_img = imread("origFrames\1.tif");
-orig_img = imread("frames\1.tif");
+orig_img = imread("frames\35.tif");
 
+
+% Remove small objects to avoid noise
+bwImg = bwareaopen(orig_img, 50);
+
+stats = regionprops(bwImg, 'BoundingBox', 'Centroid', 'Area');
+
+if ~isempty(stats)
+    % Find largest connected component (assumed to be lips)
+    [~, idx] = max([stats.Area]); 
+    bbox = stats(idx).BoundingBox;  % Extract bounding box
+    centroid = stats(idx).Centroid; % Extract centroid
+
+    img = uint8(orig_img) * 255; 
+    
+
+    % Overlay bounding box on the original image
+    imgWithBox = insertShape(img, 'Rectangle', bbox, 'Color', 'green', 'LineWidth', 2);
+
+    % Overlay centroid as a blue circle
+    imgWithBox = insertShape(imgWithBox, 'Circle', [centroid 5], 'Color', 'blue', 'LineWidth', 2);
+    
+    % Show result
+    imshow(imgWithBox);
+    title('Lips with Bounding Box and Centroid');
+end
 
 %{
 img = rgb2ycbcr(orig_img);
@@ -62,5 +87,5 @@ comb = bw_clean & lips;
 imgList = {cb_eq, cr_eq, img, mask, bw_clean, bw, lips, comb, orig_img};
 %}
 
-figure;
-montage(imgList)
+% figure;
+% montage(imgList)

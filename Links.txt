@@ -1,0 +1,4 @@
+https://github.com/kashishoberoi/Lip-Reading
+https://www.mathworks.com/help/signal/ug/label-spoken-words-in-audio-signals-using-external-api.html
+https://www.mathworks.com/matlabcentral/answers/2116682-tcn-model-to-predict-continuous-variable
+https://en.wikipedia.org/wiki/Otsu%27s_method
