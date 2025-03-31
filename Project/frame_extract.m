@@ -1,7 +1,11 @@
+% THIS SEPERATES THE VIDEO INTO FRAMES. THIS WAS DONE FOR BOTH THE ORIGINAL
+% FRAMES OF THE VIDEO (FOR VISUALIZATION) AND FOR THE BINARIZED LIPS
+
+
 %pulled from: https://www.geeksforgeeks.org/how-to-extract-frames-from-a-video-in-matlab/
 
 % import the video file 
-obj = VideoReader('sample_2.mp4'); 
+obj = VideoReader('dataset/zebra3.mp4'); 
 vid = read(obj); 
   
  % read the total number of frames 
@@ -20,7 +24,21 @@ for x = 1 : frames
     Strc = strcat(Sx, ST); 
     Vid = vid(:, :, :, x); 
     
+    % EXTRACT THE LIP INFORMATION -pk
+    img = rgb2ycbcr(Vid);
+    [y, cb, cr] = imsplit(img); % split into colour channels
+
+    cb_thresh = cb < 114; % experimentally determined
+    cr_thresh = cr > 166;
     
+    cr_lim = bwareafilt(cr_thresh, 1);
+    lips2 = cb_thresh & cr_lim;
+    
+    lips2 = imclose(lips2, strel('disk', 4)); % fill gaps in lips
+    
+    lips_clean = imclose(lips2, strel('disk', 20)); 
+    
+    %{
     % EXTRACT THE LIP INFORMATION -pk
     img = rgb2ycbcr(Vid); %convert to YCbCr
     [y, cb, cr] = imsplit(img); %split into colour channels
@@ -45,11 +63,12 @@ for x = 1 : frames
     bw_final = bwareafilt(bw, 3); %due to image, need 3 largest features
 
     comb = bw_clean & lips; %combines blown out and more accurate lips
+    %}
 
-
-    cd frames 
+    cd framesZebraBW
   
     % exporting the frames 
-    imwrite(comb, Strc); 
+    % imwrite(Vid, Strc);
+    imwrite(lips_clean, Strc);
     cd ..   
 end
