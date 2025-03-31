@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 %% Lip Reading System - Complete Implementation
 % This script contains all components of the lip reading system in one file
 % Authors: Kevin Zhang (400319666), Peter Kosir (400331918)

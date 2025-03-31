@@ -144,4 +144,5 @@ if ~isempty(stats)
     % Show result
     imshow(imgWithBox);title('Lips with Bounding Box and Centroid');
 end
+
 %}
