@@ -1,14 +1,34 @@
+% Modified frame_extract.m script that creates directories automatically
 % THIS SEPERATES THE VIDEO INTO FRAMES. THIS WAS DONE FOR BOTH THE ORIGINAL
 % FRAMES OF THE VIDEO (FOR VISUALIZATION) AND FOR THE BINARIZED LIPS
 
+% Clear workspace
+clear;
+clc;
+
+% Change these parameters for each video you want to process
+videoFile = 'dataset/zebra3.mp4';  % Change this to the video you want to process
+originalFramesDir = 'framesZebra3';  % Change to match the video (original frames)
+bwFramesDir = 'framesZebra3BW';  % Change to match the video (binary lip masks)
+
+% Create directories if they don't exist
+if ~exist(originalFramesDir, 'dir')
+    mkdir(originalFramesDir);
+    fprintf('Created directory: %s\n', originalFramesDir);
+end
+
+if ~exist(bwFramesDir, 'dir')
+    mkdir(bwFramesDir);
+    fprintf('Created directory: %s\n', bwFramesDir);
+end
 
 %pulled from: https://www.geeksforgeeks.org/how-to-extract-frames-from-a-video-in-matlab/
 
 % import the video file 
-obj = VideoReader('dataset/zebra3.mp4'); 
+obj = VideoReader(videoFile); 
 vid = read(obj); 
   
- % read the total number of frames 
+% read the total number of frames 
 frames = obj.NumFrames; 
   
 % file format of the frames to be saved in 
@@ -38,37 +58,18 @@ for x = 1 : frames
     
     lips_clean = imclose(lips2, strel('disk', 20)); 
     
-    %{
-    % EXTRACT THE LIP INFORMATION -pk
-    img = rgb2ycbcr(Vid); %convert to YCbCr
-    [y, cb, cr] = imsplit(img); %split into colour channels
-
-    cb_eq = adapthisteq(cb); %equalize the relevant colour channels
-    cr_eq = adapthisteq(cr);
-
-    cb_thresh = cb_eq > 120; %only take values above threshold, experimentally determined
-    cr_thresh = cr_eq > 130;
-
-    mask = cb_thresh & cr_thresh; %combined subtractive mask, makes cleaner lines
-
-    lips = bwareafilt(mask, 1); %just the lips, but blown out
-
-    bw = imbinarize(cb_eq, 'adaptive', 'Sensitivity', 0.553); %necessary if not thresholding, determines minute differnce in lip pusring. experimentally found 
-
-    %these can probably be optimized if we're having issues
-    bw_clean = imopen(bw, strel('disk', 1)); % remove small noise, keeps imclose from overfilling
-    bw_clean = imclose(bw_clean, strel('disk', 5)); % fill gaps in lips
-    bw_clean = imfill(bw_clean, 'holes'); % fill small holes inside lips
-
-    bw_final = bwareafilt(bw, 3); %due to image, need 3 largest features
-
-    comb = bw_clean & lips; %combines blown out and more accurate lips
-    %}
-
-    cd framesZebraBW
-  
-    % exporting the frames 
-    % imwrite(Vid, Strc);
-    imwrite(lips_clean, Strc);
-    cd ..   
+    % Save original frame
+    fullpath = fullfile(originalFramesDir, Strc);
+    imwrite(Vid, fullpath);
+    
+    % Save BW lip mask
+    fullpath = fullfile(bwFramesDir, Strc);
+    imwrite(lips_clean, fullpath);
+    
+    % Display progress
+    if mod(x, 10) == 0
+        fprintf('Processed frame %d of %d\n', x, frames);
+    end
 end
+
+fprintf('Processing complete! Extracted %d frames to %s and %s\n', frames, originalFramesDir, bwFramesDir);
